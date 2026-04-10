@@ -16,9 +16,11 @@ export default function OrderStatusChanger({
   const router = useRouter();
   const [status, setStatus] = useState(currentStatus);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = async (newStatus: string) => {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
@@ -29,9 +31,14 @@ export default function OrderStatusChanger({
       if (res.ok) {
         setStatus(newStatus);
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Eroare la actualizarea statusului");
+        setStatus(currentStatus);
       }
     } catch {
-      // Ignore
+      setError("Eroare de conexiune");
+      setStatus(currentStatus);
     }
     setLoading(false);
   };
@@ -52,6 +59,7 @@ export default function OrderStatusChanger({
         ))}
       </select>
       {loading && <span className="text-xs text-darkgray-light">Se salvează...</span>}
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }

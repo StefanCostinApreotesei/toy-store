@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -42,7 +42,7 @@ export default function AccountPage() {
           </div>
 
           <button
-            onClick={() => signIn(undefined, { callbackUrl: "/" })}
+            onClick={() => signOut({ callbackUrl: "/" })}
             className="mt-6 text-sm text-coral hover:text-coral-dark transition-colors"
           >
             Deconectare
@@ -181,7 +181,7 @@ export default function AccountPage() {
               type="password"
               name="password"
               required
-              minLength={6}
+              minLength={8}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
             />
           </div>
@@ -236,7 +236,7 @@ export default function AccountPage() {
               type="password"
               name="password"
               required
-              minLength={6}
+              minLength={8}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
             />
           </div>
@@ -248,7 +248,7 @@ export default function AccountPage() {
               type="password"
               name="confirmPassword"
               required
-              minLength={6}
+              minLength={8}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
             />
           </div>

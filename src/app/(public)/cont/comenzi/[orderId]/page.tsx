@@ -23,7 +23,12 @@ export default async function OrderDetailPage({ params }: Props) {
 
   if (!order) notFound();
 
-  const address = JSON.parse(order.shippingAddress);
+  let address: Record<string, string> = {};
+  try {
+    address = JSON.parse(order.shippingAddress);
+  } catch {
+    address = {};
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 pb-12">
@@ -86,13 +91,13 @@ export default async function OrderDetailPage({ params }: Props) {
       <div className="bg-white rounded-xl border border-gray-100 p-6">
         <h2 className="font-bold text-darkgray mb-3">Adresă livrare</h2>
         <p className="text-sm text-darkgray-light leading-relaxed">
-          {address.firstName} {address.lastName}
+          {address.firstName || ""} {address.lastName || ""}
           <br />
-          {address.street}
+          {address.street || ""}
           <br />
-          {address.city}, {address.county} {address.postalCode}
+          {address.city || ""}{address.county ? `, ${address.county}` : ""} {address.postalCode || ""}
           <br />
-          Tel: {address.phone} | Email: {address.email}
+          {address.phone ? `Tel: ${address.phone}` : ""}{address.email ? ` | Email: ${address.email}` : ""}
         </p>
       </div>
     </div>

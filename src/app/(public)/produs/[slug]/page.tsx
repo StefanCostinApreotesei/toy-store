@@ -45,9 +45,14 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
-  const specifications: Specification[] = product.specifications
-    ? JSON.parse(product.specifications)
-    : [];
+  let specifications: Specification[] = [];
+  try {
+    specifications = product.specifications
+      ? JSON.parse(product.specifications)
+      : [];
+  } catch {
+    specifications = [];
+  }
 
   const mainImage = product.images[0];
 

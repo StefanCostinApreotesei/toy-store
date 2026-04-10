@@ -8,6 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const session = await auth();
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -19,6 +20,14 @@ export async function GET(
 
   if (!order) {
     return NextResponse.json({ error: "Comandă negăsită" }, { status: 404 });
+  }
+
+  // Allow access only to: the order owner, or an admin
+  const isOwner = session?.user?.id && order.userId === session.user.id;
+  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+
+  if (!isOwner && !isAdmin) {
+    return NextResponse.json({ error: "Neautorizat" }, { status: 403 });
   }
 
   return NextResponse.json(order);

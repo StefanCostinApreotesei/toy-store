@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ORDER_STATUSES } from "@/lib/constants";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 
 export default async function OrderConfirmationPage({ params }: Props) {
   const { orderId } = await params;
+  const session = await auth();
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -26,7 +28,21 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
   if (!order) notFound();
 
-  const address = JSON.parse(order.shippingAddress);
+  // Authorization: owner, admin, or recent guest order (no userId)
+  const isOwner = session?.user?.id && order.userId === session.user.id;
+  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+  const isGuestOrder = !order.userId;
+
+  if (!isOwner && !isAdmin && !isGuestOrder) {
+    notFound();
+  }
+
+  let address: Record<string, string> = {};
+  try {
+    address = JSON.parse(order.shippingAddress);
+  } catch {
+    address = {};
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -89,13 +105,13 @@ export default async function OrderConfirmationPage({ params }: Props) {
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
         <h2 className="font-bold text-darkgray mb-3">Adresă livrare</h2>
         <p className="text-sm text-darkgray-light">
-          {address.firstName} {address.lastName}
+          {address.firstName || ""} {address.lastName || ""}
           <br />
-          {address.street}
+          {address.street || ""}
           <br />
-          {address.city}, {address.county} {address.postalCode}
+          {address.city || ""}{address.county ? `, ${address.county}` : ""} {address.postalCode || ""}
           <br />
-          Tel: {address.phone}
+          {address.phone ? `Tel: ${address.phone}` : ""}
         </p>
       </div>
 

@@ -20,7 +20,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
   if (!order) notFound();
 
-  const address = JSON.parse(order.shippingAddress);
+  let address: Record<string, string> = {};
+  try {
+    address = JSON.parse(order.shippingAddress);
+  } catch {
+    address = {};
+  }
 
   return (
     <div>
@@ -86,14 +91,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <h2 className="font-bold text-darkgray mb-3">Adresă livrare</h2>
             <div className="text-sm text-darkgray-light leading-relaxed">
               <p>
-                {address.firstName} {address.lastName}
+                {address.firstName || ""} {address.lastName || ""}
               </p>
-              <p>{address.street}</p>
+              <p>{address.street || ""}</p>
               <p>
-                {address.city}, {address.county}
+                {address.city || ""}{address.county ? `, ${address.county}` : ""}
               </p>
-              <p>{address.postalCode}</p>
-              <p>Tel: {address.phone}</p>
+              <p>{address.postalCode || ""}</p>
+              {address.phone && <p>Tel: {address.phone}</p>}
             </div>
           </div>
 

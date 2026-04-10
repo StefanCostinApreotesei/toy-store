@@ -40,6 +40,6 @@ export function calculateDiscount(price: number, oldPrice: number): number {
 export function generateOrderNumber(): string {
   const now = new Date();
   const datePart = now.toISOString().slice(0, 10).replace(/-/g, "");
-  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const randomPart = crypto.randomUUID().slice(0, 8).toUpperCase();
   return `JS-${datePart}-${randomPart}`;
 }
