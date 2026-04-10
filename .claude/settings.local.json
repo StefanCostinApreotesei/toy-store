@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(sqlite3 /c/Users/stefc/Documents/toy-store/dev.db \"SELECT COUNT\\(*\\) as products FROM Product; SELECT COUNT\\(*\\) as categories FROM Category; SELECT COUNT\\(*\\) as subcategories FROM Subcategory; SELECT COUNT\\(*\\) as users FROM User; SELECT COUNT\\(*\\) as orders FROM \\\\\"Order\\\\\";\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)"
+    ]
+  }
+}
