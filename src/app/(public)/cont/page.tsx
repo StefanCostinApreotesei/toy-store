@@ -39,6 +39,16 @@ export default function AccountPage() {
               </div>
               <span className="text-darkgray-light">→</span>
             </Link>
+            <Link
+              href="/cont/favorite"
+              className="flex items-center justify-between p-4 bg-lightgray rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">❤️</span>
+                <span className="font-medium text-darkgray">Favorite</span>
+              </div>
+              <span className="text-darkgray-light">→</span>
+            </Link>
           </div>
 
           <button
@@ -184,6 +194,14 @@ export default function AccountPage() {
               minLength={8}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
             />
+          </div>
+          <div className="flex justify-end">
+            <Link
+              href="/cont/resetare-parola"
+              className="text-sm text-coral font-medium hover:text-coral-dark transition-colors"
+            >
+              Ai uitat parola?
+            </Link>
           </div>
           <button
             type="submit"

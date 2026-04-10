@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN "paymentMethod" TEXT NOT NULL DEFAULT 'COD';
+ALTER TABLE "Order" ADD COLUMN "stripeSessionId" TEXT;
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Order_stripeSessionId_key" ON "Order"("stripeSessionId");

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
@@ -73,8 +74,20 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                 <tr key={product.id} className="hover:bg-lightgray/50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-lightgray rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-lg">🧸</span>
+                      <div className="relative w-10 h-10 bg-lightgray rounded-lg overflow-hidden flex-shrink-0">
+                        {product.images[0] ? (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.images[0].alt || product.name}
+                            fill
+                            sizes="40px"
+                            className="object-contain p-0.5"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-lg text-gray-300">📷</span>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-darkgray line-clamp-1">{product.name}</p>

@@ -20,6 +20,7 @@ export const createOrderSchema = z.object({
   items: z.array(cartItemSchema).min(1, "Coșul este gol").max(50, "Prea multe produse în coș"),
   shippingAddress: shippingAddressSchema,
   notes: z.string().max(1000, "Nota nu poate depăși 1000 caractere").optional(),
+  paymentMethod: z.enum(["COD", "STRIPE"]).default("COD"),
 });
 
 export const updateOrderStatusSchema = z.object({

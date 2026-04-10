@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import SessionProvider from "@/components/SessionProvider";
 import "./globals.css";
 
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="ro" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased">
         <SessionProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>
+            <WishlistProvider>{children}</WishlistProvider>
+          </CartProvider>
         </SessionProvider>
       </body>
     </html>

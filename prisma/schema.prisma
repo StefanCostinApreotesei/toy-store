@@ -16,8 +16,9 @@ model User {
   role           String           @default("CLIENT") // ADMIN, SUPER_ADMIN, CLIENT
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  orders         Order[]
-  addresses      ShippingAddress[]
+  orders              Order[]
+  addresses           ShippingAddress[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Category {
@@ -85,20 +86,22 @@ model ProductImage {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  status          String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount     Float
-  userId          String?
-  user            User?       @relation(fields: [userId], references: [id])
-  guestEmail      String?
-  guestName       String?
-  guestPhone      String?
-  shippingAddress String      // JSON: { firstName, lastName, phone, email, street, city, county, postalCode }
-  notes           String?
-  items           OrderItem[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  orderNumber      String      @unique
+  status           String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  paymentMethod    String      @default("COD") // COD, STRIPE
+  stripeSessionId  String?     @unique
+  totalAmount      Float
+  userId           String?
+  user             User?       @relation(fields: [userId], references: [id])
+  guestEmail       String?
+  guestName        String?
+  guestPhone       String?
+  shippingAddress  String      // JSON: { firstName, lastName, phone, email, street, city, county, postalCode }
+  notes            String?
+  items            OrderItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -134,5 +137,18 @@ model ShippingAddress {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([token])
   @@index([userId])
 }

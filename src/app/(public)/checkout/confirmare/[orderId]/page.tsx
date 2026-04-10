@@ -79,6 +79,14 @@ export default async function OrderConfirmationPage({ params }: Props) {
               })}
             </span>
           </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-darkgray-light">Plată</span>
+            <span className="text-darkgray font-medium">
+              {order.paymentMethod === "STRIPE"
+                ? "Card online (Stripe)"
+                : "Ramburs la livrare"}
+            </span>
+          </div>
         </div>
 
         <div className="border-t border-gray-100 pt-4 space-y-2">

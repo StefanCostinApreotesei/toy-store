@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/public/Breadcrumbs";
+import ImageGallery from "@/components/public/ImageGallery";
 import PriceDisplay from "@/components/public/PriceDisplay";
 import ProductSpecs from "@/components/public/ProductSpecs";
 import RecommendedProducts from "@/components/public/RecommendedProducts";
 import AddToCartButton from "@/components/public/AddToCartButton";
+import WishlistButton from "@/components/public/WishlistButton";
 import type { Specification } from "@/types/product";
 import type { Metadata } from "next";
 
@@ -75,29 +77,7 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
         {/* Image Gallery */}
-        <div className="space-y-4">
-          <div className="aspect-square bg-lightgray rounded-xl overflow-hidden flex items-center justify-center border border-gray-100">
-            <div className="w-full h-full bg-gradient-to-br from-coral/10 to-yellow/10 flex items-center justify-center">
-              <span className="text-8xl">🧸</span>
-            </div>
-          </div>
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-2">
-              {product.images.map((img, index) => (
-                <div
-                  key={img.id}
-                  className={`aspect-square rounded-lg bg-lightgray border-2 flex items-center justify-center cursor-pointer ${
-                    index === 0
-                      ? "border-coral"
-                      : "border-gray-100 hover:border-coral/50"
-                  } transition-colors`}
-                >
-                  <span className="text-2xl">🧸</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ImageGallery images={product.images} productName={product.name} />
 
         {/* Product Info */}
         <div>
@@ -151,14 +131,19 @@ export default async function ProductPage({ params }: Props) {
             </div>
           )}
 
-          <AddToCartButton
-            productId={product.id}
-            productName={product.name}
-            price={product.price}
-            stock={product.stock}
-            slug={product.slug}
-            imageUrl={mainImage?.url}
-          />
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <AddToCartButton
+                productId={product.id}
+                productName={product.name}
+                price={product.price}
+                stock={product.stock}
+                slug={product.slug}
+                imageUrl={mainImage?.url}
+              />
+            </div>
+            <WishlistButton productId={product.id} size="md" />
+          </div>
 
           {product.shortDescription && (
             <p className="mt-6 text-darkgray-light">{product.shortDescription}</p>

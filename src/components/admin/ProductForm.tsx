@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateSlug } from "@/lib/utils";
+import ImageUploader from "./ImageUploader";
 
 interface Subcategory {
   id: string;
@@ -13,6 +14,13 @@ interface Subcategory {
 interface Spec {
   key: string;
   value: string;
+}
+
+interface ProductImage {
+  id: string;
+  url: string;
+  alt: string | null;
+  displayOrder: number;
 }
 
 interface ProductFormProps {
@@ -30,6 +38,7 @@ interface ProductFormProps {
     recommendedAge: string | null;
     specifications: string | null;
     subcategoryId: string;
+    images?: ProductImage[];
   };
   subcategories: Subcategory[];
 }
@@ -57,6 +66,7 @@ export default function ProductForm({ product, subcategories }: ProductFormProps
     }
     return [];
   });
+  const [images, setImages] = useState<ProductImage[]>(product?.images || []);
 
   useEffect(() => {
     if (!isEdit && name) {
@@ -338,6 +348,27 @@ export default function ProductForm({ product, subcategories }: ProductFormProps
           </div>
         )}
       </div>
+
+      {/* Images */}
+      {isEdit && product && (
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="font-bold text-darkgray mb-4">Imagini produs</h2>
+          <ImageUploader
+            productId={product.id}
+            images={images}
+            onImagesChange={setImages}
+          />
+        </div>
+      )}
+
+      {!isEdit && (
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="font-bold text-darkgray mb-4">Imagini produs</h2>
+          <p className="text-sm text-darkgray-light">
+            Salvează produsul mai întâi, apoi vei putea adăuga imagini din pagina de editare.
+          </p>
+        </div>
+      )}
 
       {/* Submit */}
       <div className="flex gap-3">

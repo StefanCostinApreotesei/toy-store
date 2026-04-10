@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { createOrderSchema } from "@/lib/validations/order";
 import { generateOrderNumber } from "@/lib/utils";
+import { sendEmail } from "@/lib/email";
+import { orderConfirmationEmail } from "@/lib/email-templates/order-confirmation";
+import { adminNewOrderEmail } from "@/lib/email-templates/admin-new-order";
+import { stripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +20,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { items, shippingAddress, notes } = parsed.data;
+    const { items, shippingAddress, notes, paymentMethod } = parsed.data;
 
     // Get current session (optional - guest checkout allowed)
     const session = await auth();
@@ -71,6 +75,7 @@ export async function POST(request: Request) {
         data: {
           orderNumber: generateOrderNumber(),
           status: "PENDING",
+          paymentMethod,
           totalAmount,
           userId: session?.user?.id || null,
           guestEmail: !session ? shippingAddress.email : null,
@@ -97,6 +102,111 @@ export async function POST(request: Request) {
 
       return newOrder;
     });
+
+    const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+    // If Stripe, create checkout session and return URL
+    if (paymentMethod === "STRIPE") {
+      const stripeSession = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card"],
+        line_items: items.map((item) => {
+          const product = products.find((p) => p.id === item.productId)!;
+          return {
+            price_data: {
+              currency: "ron",
+              product_data: {
+                name: product.name,
+              },
+              unit_amount: Math.round(product.price * 100), // Stripe uses cents
+            },
+            quantity: item.quantity,
+          };
+        }),
+        ...(shippingCost > 0 && {
+          shipping_options: [
+            {
+              shipping_rate_data: {
+                display_name: "Livrare standard",
+                type: "fixed_amount" as const,
+                fixed_amount: {
+                  amount: Math.round(shippingCost * 100),
+                  currency: "ron",
+                },
+              },
+            },
+          ],
+        }),
+        metadata: {
+          orderId: order.id,
+        },
+        success_url: `${siteUrl}/checkout/confirmare/${order.id}`,
+        cancel_url: `${siteUrl}/checkout?cancelled=1`,
+      });
+
+      // Save stripe session ID on order
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { stripeSessionId: stripeSession.id },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Redirect la plată",
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          stripeUrl: stripeSession.url,
+        },
+        { status: 201 }
+      );
+    }
+
+    // COD flow — send emails immediately
+    const customerEmail = session?.user?.email || shippingAddress.email;
+    const customerName = `${shippingAddress.firstName} ${shippingAddress.lastName}`;
+
+    // Get product names for email
+    const orderItemsForEmail = items.map((item) => {
+      const product = products.find((p) => p.id === item.productId)!;
+      return {
+        name: product.name,
+        quantity: item.quantity,
+        unitPrice: product.price,
+      };
+    });
+
+    // Email to customer
+    if (customerEmail) {
+      sendEmail({
+        to: customerEmail,
+        subject: `Comandă confirmată — ${order.orderNumber}`,
+        html: orderConfirmationEmail({
+          orderNumber: order.orderNumber,
+          customerName,
+          items: orderItemsForEmail,
+          totalAmount: order.totalAmount,
+          shippingAddress,
+          siteUrl,
+        }),
+      }).catch((err) => console.error("Failed to send order confirmation email:", err));
+    }
+
+    // Email to admin
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      sendEmail({
+        to: adminEmail,
+        subject: `Comandă nouă — ${order.orderNumber} (${order.totalAmount.toFixed(2)} Lei)`,
+        html: adminNewOrderEmail({
+          orderNumber: order.orderNumber,
+          customerName,
+          customerEmail: customerEmail || "N/A",
+          totalAmount: order.totalAmount,
+          itemCount: items.length,
+          siteUrl,
+        }),
+      }).catch((err) => console.error("Failed to send admin notification email:", err));
+    }
 
     return NextResponse.json(
       {

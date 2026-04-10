@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import SearchBar from "./SearchBar";
 import MegaMenu from "./MegaMenu";
 import CartIcon from "./CartIcon";
+import WishlistIcon from "./WishlistIcon";
 
 async function getCategories() {
   return prisma.category.findMany({
@@ -61,6 +62,9 @@ export default async function Header() {
               </svg>
               <span className="text-sm font-medium hidden lg:block">Cont</span>
             </Link>
+
+            {/* Wishlist */}
+            <WishlistIcon />
 
             {/* Cart */}
             <CartIcon />

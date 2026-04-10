@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import PriceDisplay from "./PriceDisplay";
 import PromoBadge from "./PromoBadge";
+import WishlistButton from "./WishlistButton";
 
 interface ProductCardProps {
   product: {
@@ -25,16 +27,23 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Image */}
       <div className="relative aspect-square bg-lightgray overflow-hidden">
         {mainImage ? (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            <div className="w-full h-full bg-gradient-to-br from-coral/10 to-yellow/10 rounded-lg flex items-center justify-center">
-              <span className="text-4xl">🧸</span>
-            </div>
-          </div>
+          <Image
+            src={mainImage.url}
+            alt={mainImage.alt || product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-contain p-3"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-100">
             <span className="text-gray-300 text-4xl">📷</span>
           </div>
         )}
+
+        {/* Wishlist */}
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <WishlistButton productId={product.id} />
+        </div>
 
         {product.oldPrice && (
           <PromoBadge price={product.price} oldPrice={product.oldPrice} />

@@ -37,6 +37,8 @@ yarn-error.log*
 
 # uploads
 /uploads
+/public/uploads/products/*
+!/public/uploads/products/.gitkeep
 
 # prisma
 dev.db

@@ -19,6 +19,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
+    "@react-email/components": "^1.0.12",
+    "@stripe/stripe-js": "^9.1.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.1",
     "next": "16.2.3",
@@ -27,8 +29,10 @@
     "prisma": "^7.7.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^6.10.0",
     "sanitize-html": "^2.17.2",
     "sharp": "^0.34.5",
+    "stripe": "^22.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {

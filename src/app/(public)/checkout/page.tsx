@@ -2,16 +2,30 @@
 
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 
 export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckoutContent />
+    </Suspense>
+  );
+}
+
+function CheckoutContent() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    searchParams.get("cancelled") === "1"
+      ? "Plata a fost anulată. Poți încerca din nou."
+      : ""
+  );
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "STRIPE">("COD");
 
   const shippingCost = totalPrice >= 200 ? 0 : 15;
   const finalTotal = totalPrice + shippingCost;
@@ -60,6 +74,7 @@ export default function CheckoutPage() {
             postalCode: formData.get("postalCode"),
           },
           notes: formData.get("notes"),
+          paymentMethod,
         }),
       });
 
@@ -72,6 +87,13 @@ export default function CheckoutPage() {
       }
 
       clearCart();
+
+      // If Stripe, redirect to payment
+      if (paymentMethod === "STRIPE" && data.stripeUrl) {
+        window.location.href = data.stripeUrl;
+        return;
+      }
+
       router.push(`/checkout/confirmare/${data.orderId}`);
     } catch {
       setError("Eroare de conexiune");
@@ -261,17 +283,85 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {/* Payment method */}
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <h3 className="text-sm font-bold text-darkgray mb-3">
+                  Metodă de plată
+                </h3>
+                <div className="space-y-2">
+                  <label
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                      paymentMethod === "COD"
+                        ? "border-coral bg-coral/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="COD"
+                      checked={paymentMethod === "COD"}
+                      onChange={() => setPaymentMethod("COD")}
+                      className="w-4 h-4 text-coral focus:ring-coral"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-darkgray">
+                        Ramburs la livrare
+                      </span>
+                      <p className="text-xs text-darkgray-light">
+                        Plătești când primești coletul
+                      </p>
+                    </div>
+                  </label>
+                  <label
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                      paymentMethod === "STRIPE"
+                        ? "border-coral bg-coral/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="STRIPE"
+                      checked={paymentMethod === "STRIPE"}
+                      onChange={() => setPaymentMethod("STRIPE")}
+                      className="w-4 h-4 text-coral focus:ring-coral"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-darkgray">
+                        Card online
+                      </span>
+                      <p className="text-xs text-darkgray-light">
+                        Plată securizată prin Stripe
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full mt-6 bg-coral text-white font-bold py-3 rounded-lg hover:bg-coral-dark transition-colors disabled:opacity-50 shadow-lg"
               >
-                {loading ? "Se plasează comanda..." : "Plasează comanda"}
+                {loading
+                  ? "Se procesează..."
+                  : paymentMethod === "STRIPE"
+                  ? "Plătește cu cardul"
+                  : "Plasează comanda"}
               </button>
 
-              <p className="text-xs text-darkgray-light mt-3 text-center">
-                Plata se face ramburs la livrare
-              </p>
+              {paymentMethod === "STRIPE" && (
+                <p className="text-xs text-darkgray-light mt-3 text-center">
+                  Vei fi redirecționat către Stripe pentru plata securizată
+                </p>
+              )}
+              {paymentMethod === "COD" && (
+                <p className="text-xs text-darkgray-light mt-3 text-center">
+                  Plata se face ramburs la livrare
+                </p>
+              )}
             </div>
           </div>
         </div>
