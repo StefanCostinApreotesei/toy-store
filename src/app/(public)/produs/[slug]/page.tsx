@@ -7,6 +7,11 @@ import ProductSpecs from "@/components/public/ProductSpecs";
 import RecommendedProducts from "@/components/public/RecommendedProducts";
 import AddToCartButton from "@/components/public/AddToCartButton";
 import WishlistButton from "@/components/public/WishlistButton";
+import ProductReviews from "@/components/public/ProductReviews";
+import ProductTabs from "@/components/public/ProductTabs";
+import ShareButtons from "@/components/public/ShareButtons";
+import DeliveryEstimate from "@/components/public/DeliveryEstimate";
+import TrackRecentlyViewed from "@/components/public/TrackRecentlyViewed";
 import type { Specification } from "@/types/product";
 import type { Metadata } from "next";
 
@@ -18,11 +23,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
+    include: { images: { orderBy: { displayOrder: "asc" }, take: 1 } },
   });
   if (!product) return { title: "Produs negăsit" };
+
+  const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const imageUrl = product.images[0]?.url;
+
   return {
     title: product.name,
     description: product.shortDescription || product.name,
+    openGraph: {
+      title: product.name,
+      description: product.shortDescription || product.name,
+      type: "website",
+      url: `${siteUrl}/produs/${product.slug}`,
+      ...(imageUrl && { images: [{ url: imageUrl, alt: product.name }] }),
+    },
   };
 }
 
@@ -42,6 +59,7 @@ export default async function ProductPage({ params }: Props) {
         },
         take: 4,
       },
+      _count: { select: { reviews: true } },
     },
   });
 
@@ -58,8 +76,45 @@ export default async function ProductPage({ params }: Props) {
 
   const mainImage = product.images[0];
 
+  const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription || product.description.replace(/<[^>]*>/g, "").slice(0, 300),
+    image: product.images.map((img) => img.url),
+    sku: product.sku || undefined,
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: product.currency,
+      availability: product.stock > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      url: `${siteUrl}/produs/${product.slug}`,
+    },
+  };
+
+  const recentProduct = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: product.price,
+    oldPrice: product.oldPrice,
+    stock: product.stock,
+    images: product.images.slice(0, 1).map((img) => ({
+      url: img.url,
+      alt: img.alt,
+    })),
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 pb-12">
+      <TrackRecentlyViewed product={recentProduct} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumbs
         items={[
           { label: "Categorii", href: "/categorii" },
@@ -148,24 +203,49 @@ export default async function ProductPage({ params }: Props) {
           {product.shortDescription && (
             <p className="mt-6 text-darkgray-light">{product.shortDescription}</p>
           )}
+
+          {/* Share */}
+          <ShareButtons title={product.name} />
+
+          {/* Delivery estimate */}
+          <div className="mt-4">
+            <DeliveryEstimate stock={product.stock} price={product.price} />
+          </div>
         </div>
       </div>
 
-      {/* Description */}
-      <div className="mt-10">
-        <h2 className="text-xl font-bold text-darkgray mb-4">Descriere</h2>
-        <div
-          className="prose prose-sm max-w-none text-darkgray-light"
-          dangerouslySetInnerHTML={{ __html: product.description }}
-        />
-      </div>
-
-      {/* Specifications */}
-      {specifications.length > 0 && (
-        <div className="mt-8">
-          <ProductSpecs specifications={specifications} />
+      {/* Tabs: Descriere / Specificații / Recenzii */}
+      <ProductTabs
+        tabs={[
+          { id: "descriere", label: "Descriere" },
+          { id: "specificatii", label: "Specificații", count: specifications.length },
+          { id: "recenzii", label: "Recenzii", count: product._count.reviews },
+        ]}
+      >
+        {/* Tab: Descriere */}
+        <div>
+          <div
+            className="prose prose-sm max-w-none text-darkgray-light"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          />
         </div>
-      )}
+
+        {/* Tab: Specificații */}
+        <div>
+          {specifications.length > 0 ? (
+            <ProductSpecs specifications={specifications} />
+          ) : (
+            <p className="text-sm text-darkgray-light">
+              Nu sunt specificații disponibile pentru acest produs.
+            </p>
+          )}
+        </div>
+
+        {/* Tab: Recenzii */}
+        <div>
+          <ProductReviews productId={product.id} />
+        </div>
+      </ProductTabs>
 
       {/* Recommendations */}
       <RecommendedProducts products={product.recommendations} />

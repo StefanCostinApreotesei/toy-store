@@ -8,6 +8,8 @@ interface Product {
   oldPrice: number | null;
   stock: number;
   images: { url: string; alt: string | null }[];
+  _count?: { reviews: number };
+  avgRating?: number;
 }
 
 interface ProductGridProps {

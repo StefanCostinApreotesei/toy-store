@@ -1,5 +1,8 @@
 import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
+import CookieConsent from "@/components/public/CookieConsent";
+import BackToTop from "@/components/public/BackToTop";
+import { ToastProvider } from "@/context/ToastContext";
 
 export default function PublicLayout({
   children,
@@ -9,8 +12,12 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <main className="flex-1">{children}</main>
+      <ToastProvider>
+        <main className="flex-1">{children}</main>
+      </ToastProvider>
       <Footer />
+      <BackToTop />
+      <CookieConsent />
     </>
   );
 }

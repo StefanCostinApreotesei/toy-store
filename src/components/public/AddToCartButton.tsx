@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 import { useState } from "react";
 
 interface AddToCartButtonProps {
@@ -21,6 +22,7 @@ export default function AddToCartButton({
   imageUrl,
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
+  const { addToast } = useToast();
   const [added, setAdded] = useState(false);
 
   const handleAddToCart = () => {
@@ -33,6 +35,7 @@ export default function AddToCartButton({
       maxStock: stock,
     });
     setAdded(true);
+    addToast(`${productName} a fost adăugat în coș`);
     setTimeout(() => setAdded(false), 2000);
   };
 

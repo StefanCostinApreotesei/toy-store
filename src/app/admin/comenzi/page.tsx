@@ -40,7 +40,15 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-darkgray mb-6">Comenzi</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-darkgray">Comenzi</h1>
+        <a
+          href="/api/orders/export"
+          className="bg-darkgray text-white font-bold px-4 py-2.5 rounded-lg text-sm hover:bg-darkgray/90 transition-colors"
+        >
+          Exportă CSV
+        </a>
+      </div>
 
       {/* Status filters */}
       <div className="flex flex-wrap gap-2 mb-6">

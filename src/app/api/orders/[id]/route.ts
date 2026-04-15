@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { updateOrderStatusSchema } from "@/lib/validations/order";
+import { sendEmail } from "@/lib/email";
+import { orderStatusEmail } from "@/lib/email-templates/order-status";
 
 export async function GET(
   _request: Request,
@@ -58,7 +60,26 @@ export async function PUT(
     const order = await prisma.order.update({
       where: { id },
       data: { status: parsed.data.status },
+      include: { user: { select: { name: true, email: true } } },
     });
+
+    // Send status notification email
+    const customerEmail = order.user?.email || order.guestEmail;
+    const customerName = order.user?.name || order.guestName || "Client";
+    const siteUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+    if (customerEmail && parsed.data.status !== "PENDING") {
+      sendEmail({
+        to: customerEmail,
+        subject: `Comandă ${order.orderNumber} — ${parsed.data.status === "CONFIRMED" ? "Confirmată" : parsed.data.status === "SHIPPED" ? "Expediată" : parsed.data.status === "DELIVERED" ? "Livrată" : "Anulată"}`,
+        html: orderStatusEmail({
+          orderNumber: order.orderNumber,
+          customerName,
+          status: parsed.data.status,
+          siteUrl,
+        }),
+      }).catch((err) => console.error("Failed to send status email:", err));
+    }
 
     return NextResponse.json(order);
   } catch {

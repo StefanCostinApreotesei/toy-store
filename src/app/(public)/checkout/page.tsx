@@ -14,6 +14,13 @@ export default function CheckoutPage() {
   );
 }
 
+interface AppliedCoupon {
+  code: string;
+  discountType: string;
+  discountValue: number;
+  discountAmount: number;
+}
+
 function CheckoutContent() {
   const { items, totalPrice, clearCart } = useCart();
   const { data: session } = useSession();
@@ -27,8 +34,52 @@ function CheckoutContent() {
   );
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "STRIPE">("COD");
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+
   const shippingCost = totalPrice >= 200 ? 0 : 15;
-  const finalTotal = totalPrice + shippingCost;
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const finalTotal = totalPrice + shippingCost - discountAmount;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), orderTotal: totalPrice }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCouponError(data.error || "Cupon invalid");
+        setCouponLoading(false);
+        return;
+      }
+
+      setAppliedCoupon({
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        discountAmount: data.discountAmount,
+      });
+    } catch {
+      setCouponError("Eroare de conexiune");
+    }
+    setCouponLoading(false);
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   if (items.length === 0) {
     return (
@@ -75,6 +126,7 @@ function CheckoutContent() {
           },
           notes: formData.get("notes"),
           paymentMethod,
+          couponCode: appliedCoupon?.code || undefined,
         }),
       });
 
@@ -261,6 +313,57 @@ function CheckoutContent() {
                 ))}
               </div>
 
+              {/* Coupon */}
+              <div className="border-t border-gray-100 pt-4">
+                <h3 className="text-sm font-bold text-darkgray mb-2">
+                  Cupon de reducere
+                </h3>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green/10 rounded-lg px-3 py-2">
+                    <div>
+                      <span className="text-sm font-medium text-green">
+                        {appliedCoupon.code}
+                      </span>
+                      <span className="text-xs text-darkgray-light ml-2">
+                        ({appliedCoupon.discountType === "PERCENTAGE"
+                          ? `${appliedCoupon.discountValue}%`
+                          : `${appliedCoupon.discountValue.toFixed(2).replace(".", ",")} Lei`})
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-xs text-red-500 hover:text-red-700 font-medium"
+                    >
+                      Elimină
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Cod cupon"
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="px-4 py-2 bg-darkgray text-white text-sm font-medium rounded-lg hover:bg-darkgray/90 transition-colors disabled:opacity-50"
+                      >
+                        {couponLoading ? "..." : "Aplică"}
+                      </button>
+                    </div>
+                    {couponError && (
+                      <p className="text-xs text-red-500 mt-1">{couponError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="border-t border-gray-100 pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-darkgray-light">Subtotal</span>
@@ -272,6 +375,14 @@ function CheckoutContent() {
                     {shippingCost === 0 ? "Gratuită" : `${shippingCost.toFixed(2).replace(".", ",")} Lei`}
                   </span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-darkgray-light">Reducere cupon</span>
+                    <span className="text-green font-medium">
+                      -{discountAmount.toFixed(2).replace(".", ",")} Lei
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="border-t border-gray-100 pt-3 mt-3">

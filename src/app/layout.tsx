@@ -17,6 +17,18 @@ export const metadata: Metadata = {
   },
   description:
     "Magazin online cu jucării pentru copii și animale de companie. Jucării educaționale, LEGO, jucării pentru câini, pisici și hamsteri.",
+  openGraph: {
+    type: "website",
+    locale: "ro_RO",
+    siteName: "JucăriiShop",
+    title: "JucăriiShop - Magazin Online Jucării",
+    description:
+      "Magazin online cu jucării pentru copii și animale de companie. Jucării educaționale, LEGO, jucării pentru câini, pisici și hamsteri.",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
 };
 
 export default function RootLayout({

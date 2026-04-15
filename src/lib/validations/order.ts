@@ -21,6 +21,7 @@ export const createOrderSchema = z.object({
   shippingAddress: shippingAddressSchema,
   notes: z.string().max(1000, "Nota nu poate depăși 1000 caractere").optional(),
   paymentMethod: z.enum(["COD", "STRIPE"]).default("COD"),
+  couponCode: z.string().max(50).optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

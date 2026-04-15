@@ -24,8 +24,18 @@ export default async function Header() {
       {/* Top bar */}
       <div className="bg-darkgray text-white text-xs py-1.5">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <span>Livrare gratuită pentru comenzi peste 200 Lei</span>
           <div className="flex items-center gap-4">
+            <span className="hidden sm:inline">🚚 Livrare gratuită peste 200 Lei</span>
+            <span className="hidden md:inline text-gray-400">|</span>
+            <span className="hidden md:inline">↩️ Retur gratuit 30 zile</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/informatii-livrare" className="hover:text-yellow transition-colors hidden sm:inline">
+              Livrare
+            </Link>
+            <Link href="/intrebari-frecvente" className="hover:text-yellow transition-colors hidden sm:inline">
+              Ajutor
+            </Link>
             <Link href="/contact" className="hover:text-yellow transition-colors">
               Contact
             </Link>
@@ -35,10 +45,10 @@ export default async function Header() {
 
       {/* Main header */}
       <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 lg:gap-6">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <span className="text-2xl font-bold">
+            <span className="text-xl lg:text-2xl font-bold">
               <span className="text-coral">Jucării</span>
               <span className="text-darkgray">Shop</span>
             </span>
@@ -51,7 +61,7 @@ export default async function Header() {
           <SearchBar />
 
           {/* Right actions */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
             {/* Account */}
             <Link
               href="/cont"
