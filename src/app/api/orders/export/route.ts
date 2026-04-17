@@ -75,7 +75,12 @@ export async function GET() {
 }
 
 function escapeCSV(value: string | number): string {
-  const str = String(value);
+  let str = String(value);
+  // Prevent CSV formula injection — a cell starting with =, +, -, @, \t, \r
+  // is executed as a formula by Excel/LibreOffice/Sheets.
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return `"${str.replace(/"/g, '""')}"`;
   }
