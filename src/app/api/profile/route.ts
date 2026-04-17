@@ -69,9 +69,13 @@ export async function PUT(request: Request) {
     }
 
     const hashedPassword = await hash(result.data.newPassword, 12);
+    // Bump tokenVersion to revoke any other sessions using the old password.
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { hashedPassword },
+      data: {
+        hashedPassword,
+        tokenVersion: { increment: 1 },
+      },
     });
 
     return NextResponse.json({ message: "Parola a fost schimbată cu succes" });

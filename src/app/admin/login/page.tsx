@@ -27,7 +27,11 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Email sau parolă incorectă");
+      if (result.code === "account_locked") {
+        setError("Cont blocat temporar din cauza prea multor încercări. Încearcă din nou în 15 minute.");
+      } else {
+        setError("Email sau parolă incorectă");
+      }
     } else {
       router.push(callbackUrl);
       router.refresh();

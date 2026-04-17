@@ -60,10 +60,16 @@ export async function POST(request: Request) {
     // Update password and mark token as used
     const hashedPassword = await hash(password, 12);
 
+    // Bumping tokenVersion invalidates any JWTs minted before this reset.
     await prisma.$transaction([
       prisma.user.update({
         where: { id: resetToken.userId },
-        data: { hashedPassword },
+        data: {
+          hashedPassword,
+          tokenVersion: { increment: 1 },
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
       }),
       prisma.passwordResetToken.update({
         where: { id: resetToken.id },

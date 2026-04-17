@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  email          String           @unique
-  hashedPassword String
-  name           String?
-  phone          String?
-  role           String           @default("CLIENT") // ADMIN, SUPER_ADMIN, CLIENT
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  hashedPassword      String
+  name                String?
+  phone               String?
+  role                String    @default("CLIENT") // ADMIN, SUPER_ADMIN, CLIENT
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  tokenVersion        Int       @default(0) // bump to invalidate all active JWTs
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
   orders              Order[]
   addresses           ShippingAddress[]
   passwordResetTokens PasswordResetToken[]
