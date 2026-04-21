@@ -82,11 +82,11 @@ export default async function HomePage() {
       <HeroBanner />
 
       {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-darkgray mb-6">
+      <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+        <h2 className="text-lg sm:text-2xl font-bold text-darkgray mb-4 sm:mb-6">
           Categorii populare
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {categories.map((cat) =>
             cat.subcategories.map((sub) => {
               const iconData = SUBCATEGORY_ICONS[sub.slug] || {
@@ -112,10 +112,10 @@ export default async function HomePage() {
 
       {/* Best Sellers */}
       {bestSellers.length > 0 && (
-        <section className="bg-lightgray py-12">
+        <section className="bg-lightgray py-8 sm:py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-darkgray">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-2xl font-bold text-darkgray">
                 Cele mai vândute
               </h2>
               <Link
@@ -132,9 +132,9 @@ export default async function HomePage() {
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-darkgray">
+        <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-darkgray">
               Noutăți
             </h2>
             <Link
@@ -150,14 +150,14 @@ export default async function HomePage() {
 
       {/* Discounted Products */}
       {discountedProducts.length > 0 && (
-        <section className="bg-gradient-to-r from-coral/5 to-yellow/5 py-12">
+        <section className="bg-gradient-to-r from-coral/5 to-yellow/5 py-8 sm:py-12">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <span className="bg-coral text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="bg-coral text-white text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg">
                   REDUCERI
                 </span>
-                <h2 className="text-2xl font-bold text-darkgray">
+                <h2 className="text-lg sm:text-2xl font-bold text-darkgray">
                   Oferte speciale
                 </h2>
               </div>
@@ -175,9 +175,9 @@ export default async function HomePage() {
 
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-darkgray">
+        <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-darkgray">
               Produse recomandate
             </h2>
             <Link
@@ -198,8 +198,8 @@ export default async function HomePage() {
       <NewsletterSignup />
 
       {/* Trust banners */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
           <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100">
             <span className="text-3xl">🚚</span>
             <div>

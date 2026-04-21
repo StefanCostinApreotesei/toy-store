@@ -35,12 +35,12 @@ export default function NewsletterSignup() {
   };
 
   return (
-    <section className="bg-gradient-to-r from-coral to-coral-dark py-12">
+    <section className="bg-gradient-to-r from-coral to-coral-dark py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
           Abonează-te la newsletter
         </h2>
-        <p className="text-white/80 mb-6 max-w-lg mx-auto">
+        <p className="text-white/80 mb-6 max-w-lg mx-auto text-sm sm:text-base">
           Primește primele oferte, reduceri exclusive și noutăți direct în inbox-ul tău.
         </p>
 

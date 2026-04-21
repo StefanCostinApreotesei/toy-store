@@ -3,8 +3,15 @@
 import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useMemo, useState, Suspense } from "react";
 import Link from "next/link";
+import SearchableSelect from "@/components/public/SearchableSelect";
+import PhonePrefixInput from "@/components/public/PhonePrefixInput";
+import {
+  JUDETE,
+  LOCALITATI_BY_JUDET,
+  type Judet,
+} from "@/lib/data/romania-locations";
 
 export default function CheckoutPage() {
   return (
@@ -27,12 +34,30 @@ function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const [error, setError] = useState(
     searchParams.get("cancelled") === "1"
       ? "Plata a fost anulată. Poți încerca din nou."
       : ""
   );
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "STRIPE">("COD");
+
+  // Address dropdowns
+  const [county, setCounty] = useState<Judet | "">("");
+  const [city, setCity] = useState("");
+
+  const judetOptions = useMemo(
+    () => JUDETE.map((j) => ({ value: j, label: j })),
+    []
+  );
+
+  const cityOptions = useMemo(() => {
+    if (!county) return [];
+    return (LOCALITATI_BY_JUDET[county] || []).map((c) => ({
+      value: c,
+      label: c,
+    }));
+  }, [county]);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -81,7 +106,7 @@ function CheckoutContent() {
     setCouponError("");
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !orderPlaced) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <span className="text-6xl mb-4 block">🛒</span>
@@ -138,15 +163,17 @@ function CheckoutContent() {
         return;
       }
 
-      clearCart();
+      setOrderPlaced(true);
 
-      // If Stripe, redirect to payment
       if (paymentMethod === "STRIPE" && data.stripeUrl) {
+        clearCart();
         window.location.href = data.stripeUrl;
         return;
       }
 
+      // Navigate first so the empty-cart state never flashes; clear cart after.
       router.push(`/checkout/confirmare/${data.orderId}`);
+      clearCart();
     } catch {
       setError("Eroare de conexiune");
       setLoading(false);
@@ -203,13 +230,7 @@ function CheckoutContent() {
                   <label className="block text-sm font-medium text-darkgray mb-1">
                     Telefon *
                   </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
-                    placeholder="07xx xxx xxx"
-                  />
+                  <PhonePrefixInput name="phone" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-darkgray mb-1">
@@ -236,34 +257,47 @@ function CheckoutContent() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-darkgray mb-1">
-                    Oraș *
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    required
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-darkgray mb-1">
                     Județ *
                   </label>
-                  <input
-                    type="text"
+                  <SearchableSelect
                     name="county"
                     required
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
+                    options={judetOptions}
+                    value={county}
+                    onChange={(v) => {
+                      setCounty(v as Judet);
+                      setCity("");
+                    }}
+                    placeholder="Selectează județul"
+                    searchPlaceholder="Caută județ..."
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-darkgray mb-1">
-                    Cod poștal *
+                    Oraș / Localitate *
+                  </label>
+                  <SearchableSelect
+                    name="city"
+                    required
+                    options={cityOptions}
+                    value={city}
+                    onChange={setCity}
+                    placeholder={county ? "Selectează localitatea" : "Alege mai întâi județul"}
+                    searchPlaceholder="Caută localitate..."
+                    emptyMessage="Nicio localitate găsită"
+                    disabled={!county}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-darkgray mb-1">
+                    Cod poștal (opțional)
                   </label>
                   <input
                     type="text"
                     name="postalCode"
-                    required
+                    inputMode="numeric"
+                    pattern="\d{6}"
+                    maxLength={6}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-coral focus:ring-2 focus:ring-coral/20 focus:outline-none"
                     placeholder="012345"
                   />

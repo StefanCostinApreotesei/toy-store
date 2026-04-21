@@ -92,9 +92,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: { id: token.id as string },
             select: { tokenVersion: true },
           });
-          if (!current || current.tokenVersion !== token.tokenVersion) {
+          if (!current) return {};
+          // Pre-upgrade JWTs don't carry tokenVersion; treat missing as 0 so
+          // existing sessions aren't nuked the moment this code ships.
+          const jwtVersion = (token.tokenVersion as number | undefined) ?? 0;
+          if (current.tokenVersion !== jwtVersion) {
             return {};
           }
+          token.tokenVersion = current.tokenVersion;
           token.tokenVersionCheckedAt = Date.now();
         }
       }

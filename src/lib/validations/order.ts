@@ -3,12 +3,17 @@ import { z } from "zod/v4";
 export const shippingAddressSchema = z.object({
   firstName: z.string().min(2, "Prenumele este obligatoriu").max(100, "Prenumele nu poate depăși 100 caractere"),
   lastName: z.string().min(2, "Numele este obligatoriu").max(100, "Numele nu poate depăși 100 caractere"),
-  phone: z.string().min(10, "Număr de telefon invalid").max(20, "Număr de telefon prea lung"),
+  phone: z.string().min(8, "Număr de telefon invalid").max(25, "Număr de telefon prea lung"),
   email: z.email("Email invalid"),
   street: z.string().min(3, "Adresa este obligatorie").max(300, "Adresa nu poate depăși 300 caractere"),
   city: z.string().min(2, "Orașul este obligatoriu").max(100, "Orașul nu poate depăși 100 caractere"),
   county: z.string().min(2, "Județul este obligatoriu").max(100, "Județul nu poate depăși 100 caractere"),
-  postalCode: z.string().min(4, "Codul poștal este obligatoriu").max(10, "Cod poștal invalid"),
+  // Romanian postal codes are 6 digits. Optional; when present, must match the format.
+  postalCode: z
+    .string()
+    .regex(/^\d{6}$/, "Codul poștal trebuie să aibă 6 cifre")
+    .optional()
+    .or(z.literal("")),
 });
 
 export const cartItemSchema = z.object({

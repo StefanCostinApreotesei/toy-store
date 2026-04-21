@@ -4,9 +4,9 @@ export default function Footer() {
   return (
     <footer className="bg-darkgray text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 sm:col-span-2 md:col-span-3 lg:col-span-1">
             <Link href="/">
               <span className="text-xl font-bold">
                 <span className="text-coral">Jucării</span>
@@ -58,33 +58,6 @@ export default function Footer() {
               <li>
                 <Link href="/categorii/jucarii-animale/hamsteri" className="hover:text-coral transition-colors">
                   Jucării hamsteri
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contul meu */}
-          <div>
-            <h3 className="font-bold mb-4 text-sm uppercase tracking-wider text-white">Contul meu</h3>
-            <ul className="space-y-2.5 text-sm text-gray-400">
-              <li>
-                <Link href="/cont" className="hover:text-coral transition-colors">
-                  Autentificare
-                </Link>
-              </li>
-              <li>
-                <Link href="/cont/comenzi" className="hover:text-coral transition-colors">
-                  Comenzile mele
-                </Link>
-              </li>
-              <li>
-                <Link href="/cont/favorite" className="hover:text-coral transition-colors">
-                  Favorite
-                </Link>
-              </li>
-              <li>
-                <Link href="/cos" className="hover:text-coral transition-colors">
-                  Coș de cumpărături
                 </Link>
               </li>
             </ul>
@@ -147,10 +120,10 @@ export default function Footer() {
 
         {/* Trust bar + ANPC */}
         <div className="mt-10 pt-6 border-t border-gray-700">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Payment methods */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 mr-2">Plăți securizate:</span>
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
+              <span className="text-xs text-gray-500 mr-1 sm:mr-2">Plăți securizate:</span>
               <span className="bg-white/10 px-3 py-1.5 rounded text-xs font-bold text-gray-300">VISA</span>
               <span className="bg-white/10 px-3 py-1.5 rounded text-xs font-bold text-gray-300">Mastercard</span>
               <span className="bg-white/10 px-3 py-1.5 rounded text-xs font-bold text-gray-300">Ramburs</span>

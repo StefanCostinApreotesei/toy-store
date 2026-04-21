@@ -15,7 +15,7 @@ export default function ContactPage() {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-darkgray mb-8">Contact</h1>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-10">
           <div className="bg-white rounded-xl border border-gray-100 p-5 text-center">
             <span className="text-2xl mb-2 block">📧</span>
             <h3 className="font-bold text-darkgray text-sm mb-1">Email</h3>

@@ -5,10 +5,10 @@ import { rateLimit } from "./lib/rate-limit";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Rate limit auth endpoints
-  if (pathname.startsWith("/api/auth")) {
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
-    const { success } = rateLimit(`auth:${ip}`, 10, 60000);
+  // Rate limit auth login attempts (POST only — not session checks)
+  if (pathname.startsWith("/api/auth") && request.method === "POST") {
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const { success } = rateLimit(`auth:${ip}`, 15, 60000);
     if (!success) {
       return NextResponse.json(
         { error: "Prea multe încercări. Încercați din nou mai târziu." },

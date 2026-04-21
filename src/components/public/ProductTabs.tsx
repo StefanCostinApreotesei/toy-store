@@ -27,7 +27,7 @@ export default function ProductTabs({ tabs, children }: ProductTabsProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+              className={`px-3 sm:px-6 py-3 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? "border-coral text-coral"
                   : "border-transparent text-darkgray-light hover:text-darkgray hover:border-gray-300"

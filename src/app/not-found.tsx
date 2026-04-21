@@ -5,10 +5,10 @@ export default function NotFound() {
     <div className="min-h-screen flex items-center justify-center bg-lightgray px-4">
       <div className="text-center max-w-md">
         <div className="relative inline-block mb-6">
-          <span className="text-[120px] leading-none block">🧸</span>
-          <span className="absolute -top-2 -right-4 text-6xl font-extrabold text-coral">?</span>
+          <span className="text-[80px] sm:text-[120px] leading-none block">🧸</span>
+          <span className="absolute -top-2 -right-3 sm:-right-4 text-4xl sm:text-6xl font-extrabold text-coral">?</span>
         </div>
-        <h1 className="text-7xl font-extrabold text-coral mb-4">404</h1>
+        <h1 className="text-5xl sm:text-7xl font-extrabold text-coral mb-4">404</h1>
         <h2 className="text-xl font-bold text-darkgray mb-3">
           Pagina nu a fost găsită
         </h2>

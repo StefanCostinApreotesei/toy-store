@@ -31,8 +31,8 @@ export default function RecentlyViewed() {
   if (products.length === 0) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
-      <h2 className="text-2xl font-bold text-darkgray mb-6">
+    <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+      <h2 className="text-lg sm:text-2xl font-bold text-darkgray mb-4 sm:mb-6">
         Vizualizate recent
       </h2>
       <ProductCarousel products={products} />
