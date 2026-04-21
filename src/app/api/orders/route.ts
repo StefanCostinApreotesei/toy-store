@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { items, shippingAddress, notes, paymentMethod } = parsed.data;
+    const { items, shippingAddress, notes, paymentMethod, couponCode } = parsed.data;
 
     // Get current session (optional - guest checkout allowed)
     const session = await auth();
@@ -64,9 +64,55 @@ export async function POST(request: Request) {
       };
     });
 
+    // Validate and calculate coupon discount
+    let discountAmount = 0;
+    let validatedCouponCode: string | null = null;
+
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: couponCode.toUpperCase() },
+      });
+
+      if (!coupon || !coupon.active) {
+        return NextResponse.json(
+          { error: "Cuponul nu există sau nu este activ" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+        return NextResponse.json(
+          { error: "Cuponul a expirat" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+        return NextResponse.json(
+          { error: "Cuponul a atins limita de utilizări" },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.minOrderAmount && totalAmount < coupon.minOrderAmount) {
+        return NextResponse.json(
+          { error: `Comanda minimă pentru acest cupon este ${coupon.minOrderAmount.toFixed(2).replace(".", ",")} Lei` },
+          { status: 400 }
+        );
+      }
+
+      if (coupon.discountType === "PERCENTAGE") {
+        discountAmount = Math.round(totalAmount * (coupon.discountValue / 100) * 100) / 100;
+      } else {
+        discountAmount = Math.min(coupon.discountValue, totalAmount);
+      }
+
+      validatedCouponCode = coupon.code;
+    }
+
     // Add shipping cost
     const shippingCost = totalAmount >= 200 ? 0 : 15;
-    totalAmount += shippingCost;
+    totalAmount += shippingCost - discountAmount;
 
     // Create order with items in a transaction
     const order = await prisma.$transaction(async (tx) => {
@@ -77,6 +123,8 @@ export async function POST(request: Request) {
           status: "PENDING",
           paymentMethod,
           totalAmount,
+          couponCode: validatedCouponCode,
+          discountAmount,
           userId: session?.user?.id || null,
           guestEmail: !session ? shippingAddress.email : null,
           guestName: !session
@@ -97,6 +145,14 @@ export async function POST(request: Request) {
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { decrement: item.quantity } },
+        });
+      }
+
+      // Increment coupon usage
+      if (validatedCouponCode) {
+        await tx.coupon.update({
+          where: { code: validatedCouponCode },
+          data: { usedCount: { increment: 1 } },
         });
       }
 

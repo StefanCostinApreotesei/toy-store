@@ -10,6 +10,7 @@ const navItems = [
   { label: "Produse", href: "/admin/produse", icon: "📦" },
   { label: "Categorii", href: "/admin/categorii", icon: "📂" },
   { label: "Comenzi", href: "/admin/comenzi", icon: "🛒" },
+  { label: "Cupoane", href: "/admin/cupoane", icon: "🎟️" },
   { label: "Setări", href: "/admin/setari", icon: "⚙️" },
 ];
 

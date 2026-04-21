@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcrypt";
 import { z } from "zod/v4";
@@ -27,8 +28,11 @@ export async function POST(request: Request) {
 
     const { token, password } = parsed.data;
 
+    // Tokens are stored hashed; the raw value only exists in the email link.
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+
     const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
+      where: { token: tokenHash },
       include: { user: true },
     });
 
@@ -56,10 +60,16 @@ export async function POST(request: Request) {
     // Update password and mark token as used
     const hashedPassword = await hash(password, 12);
 
+    // Bumping tokenVersion invalidates any JWTs minted before this reset.
     await prisma.$transaction([
       prisma.user.update({
         where: { id: resetToken.userId },
-        data: { hashedPassword },
+        data: {
+          hashedPassword,
+          tokenVersion: { increment: 1 },
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
       }),
       prisma.passwordResetToken.update({
         where: { id: resetToken.id },

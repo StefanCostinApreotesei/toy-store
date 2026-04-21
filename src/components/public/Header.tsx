@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import MegaMenu from "./MegaMenu";
 import CartIcon from "./CartIcon";
 import WishlistIcon from "./WishlistIcon";
+import AccountLink from "./AccountLink";
 
 async function getCategories() {
   return prisma.category.findMany({
@@ -24,8 +25,18 @@ export default async function Header() {
       {/* Top bar */}
       <div className="bg-darkgray text-white text-xs py-1.5">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <span>Livrare gratuită pentru comenzi peste 200 Lei</span>
           <div className="flex items-center gap-4">
+            <span className="hidden sm:inline">🚚 Livrare gratuită peste 200 Lei</span>
+            <span className="hidden md:inline text-gray-400">|</span>
+            <span className="hidden md:inline">↩️ Retur gratuit 30 zile</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/informatii-livrare" className="hover:text-yellow transition-colors hidden sm:inline">
+              Livrare
+            </Link>
+            <Link href="/intrebari-frecvente" className="hover:text-yellow transition-colors hidden sm:inline">
+              Ajutor
+            </Link>
             <Link href="/contact" className="hover:text-yellow transition-colors">
               Contact
             </Link>
@@ -34,11 +45,12 @@ export default async function Header() {
       </div>
 
       {/* Main header */}
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-2 sm:py-3">
+        {/* Row 1: Logo + Menu + Actions (+ search on desktop) */}
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <span className="text-2xl font-bold">
+            <span className="text-lg sm:text-xl lg:text-2xl font-bold">
               <span className="text-coral">Jucării</span>
               <span className="text-darkgray">Shop</span>
             </span>
@@ -47,21 +59,15 @@ export default async function Header() {
           {/* Mega Menu */}
           <MegaMenu categories={categories} />
 
-          {/* Search Bar */}
-          <SearchBar />
+          {/* Search Bar — hidden on mobile, shown on sm+ */}
+          <div className="hidden sm:block flex-1">
+            <SearchBar />
+          </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0 ml-auto sm:ml-0">
             {/* Account */}
-            <Link
-              href="/cont"
-              className="flex items-center gap-1.5 text-darkgray hover:text-coral transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="text-sm font-medium hidden lg:block">Cont</span>
-            </Link>
+            <AccountLink />
 
             {/* Wishlist */}
             <WishlistIcon />
@@ -69,6 +75,11 @@ export default async function Header() {
             {/* Cart */}
             <CartIcon />
           </div>
+        </div>
+
+        {/* Row 2: Search bar on mobile only */}
+        <div className="mt-2 sm:hidden">
+          <SearchBar />
         </div>
       </div>
     </header>

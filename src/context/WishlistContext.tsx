@@ -6,8 +6,10 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
+import { useSession } from "next-auth/react";
 
 interface WishlistContextType {
   items: string[]; // product IDs
@@ -19,37 +21,49 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-const WISHLIST_STORAGE_KEY = "jucariistore-wishlist";
+function storageKey(userId?: string | null): string {
+  return userId ? `jucariistore-wishlist-${userId}` : "jucariistore-wishlist-guest";
+}
 
-function loadWishlist(): string[] {
+function loadWishlist(key: string): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+    const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
   }
 }
 
-function saveWishlist(items: string[]) {
+function saveWishlist(key: string, items: string[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
+  localStorage.setItem(key, JSON.stringify(items));
 }
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
   const [items, setItems] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
+  const keyRef = useRef("");
 
+  // Load / reload when session resolves or user changes
   useEffect(() => {
-    setItems(loadWishlist());
-    setMounted(true);
-  }, []);
+    if (status === "loading") return;
 
-  useEffect(() => {
-    if (mounted) {
-      saveWishlist(items);
+    const key = storageKey(session?.user?.id);
+    if (key !== keyRef.current) {
+      keyRef.current = key;
+      setItems(loadWishlist(key));
     }
-  }, [items, mounted]);
+    if (!ready) setReady(true);
+  }, [session?.user?.id, status, ready]);
+
+  // Persist on change
+  useEffect(() => {
+    if (ready && keyRef.current) {
+      saveWishlist(keyRef.current, items);
+    }
+  }, [items, ready]);
 
   const toggleItem = useCallback((productId: string) => {
     setItems((prev) =>

@@ -8,17 +8,21 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  email          String           @unique
-  hashedPassword String
-  name           String?
-  phone          String?
-  role           String           @default("CLIENT") // ADMIN, SUPER_ADMIN, CLIENT
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  hashedPassword      String
+  name                String?
+  phone               String?
+  role                String    @default("CLIENT") // ADMIN, SUPER_ADMIN, CLIENT
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  tokenVersion        Int       @default(0) // bump to invalidate all active JWTs
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
   orders              Order[]
   addresses           ShippingAddress[]
   passwordResetTokens PasswordResetToken[]
+  reviews             Review[]
 }
 
 model Category {
@@ -67,6 +71,7 @@ model Product {
   recommendations  Product[]      @relation("ProductRecommendations")
   recommendedBy    Product[]      @relation("ProductRecommendations")
   orderItems       OrderItem[]
+  reviews          Review[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -91,6 +96,8 @@ model Order {
   status           String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   paymentMethod    String      @default("COD") // COD, STRIPE
   stripeSessionId  String?     @unique
+  couponCode       String?
+  discountAmount   Float       @default(0)
   totalAmount      Float
   userId           String?
   user             User?       @relation(fields: [userId], references: [id])
@@ -151,4 +158,43 @@ model PasswordResetToken {
 
   @@index([token])
   @@index([userId])
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountType    String    // PERCENTAGE, FIXED
+  discountValue   Float     // e.g. 10 for 10% or 10 Lei
+  minOrderAmount  Float?    // minimum order to apply
+  maxUses         Int?      // null = unlimited
+  usedCount       Int       @default(0)
+  expiresAt       DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  comment   String?
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([email])
 }

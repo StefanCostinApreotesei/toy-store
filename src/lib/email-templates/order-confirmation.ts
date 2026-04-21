@@ -17,7 +17,7 @@ interface OrderConfirmationData {
     street: string;
     city: string;
     county: string;
-    postalCode: string;
+    postalCode?: string;
     phone: string;
   };
   siteUrl: string;
@@ -66,7 +66,7 @@ export function orderConfirmationEmail(data: OrderConfirmationData): string {
     <p style="margin:0 0 24px;color:#7A797E;font-size:14px;line-height:1.6;">
       ${addr.firstName} ${addr.lastName}<br>
       ${addr.street}<br>
-      ${addr.city}, ${addr.county} ${addr.postalCode}<br>
+      ${addr.city}, ${addr.county}${addr.postalCode ? ` ${addr.postalCode}` : ""}<br>
       Tel: ${addr.phone}
     </p>
 

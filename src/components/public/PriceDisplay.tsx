@@ -24,15 +24,17 @@ export default function PriceDisplay({
 
   return (
     <div>
-      {/* Old price + discount badge */}
+      {/* Old price + discount badge (badge hidden on sm — PromoBadge on image handles it) */}
       {oldPrice && discount > 0 && (
         <div className="flex items-center gap-2 mb-0.5">
           <span className={`${s.old} line-through text-darkgray/40`}>
             {oldPrice.toFixed(2).replace(".", ",")} Lei
           </span>
-          <span className="bg-yellow text-darkgray text-xs font-bold px-1.5 py-0.5 rounded">
-            -{discount}%
-          </span>
+          {size !== "sm" && (
+            <span className="bg-yellow text-darkgray text-xs font-bold px-1.5 py-0.5 rounded">
+              -{discount}%
+            </span>
+          )}
         </div>
       )}
 

@@ -49,6 +49,40 @@ export default function AccountPage() {
               </div>
               <span className="text-darkgray-light">→</span>
             </Link>
+            <Link
+              href="/cont/profil"
+              className="flex items-center justify-between p-4 bg-lightgray rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">✏️</span>
+                <span className="font-medium text-darkgray">Editare profil</span>
+              </div>
+              <span className="text-darkgray-light">→</span>
+            </Link>
+            <Link
+              href="/cont/adrese"
+              className="flex items-center justify-between p-4 bg-lightgray rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">📍</span>
+                <span className="font-medium text-darkgray">Adresele mele</span>
+              </div>
+              <span className="text-darkgray-light">→</span>
+            </Link>
+
+            {/* Admin Panel — only for ADMIN / SUPER_ADMIN */}
+            {(session.user.role === "ADMIN" || session.user.role === "SUPER_ADMIN") && (
+              <Link
+                href="/admin"
+                className="flex items-center justify-between p-4 bg-darkgray rounded-lg hover:bg-darkgray-light transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🛠️</span>
+                  <span className="font-medium text-white">Admin Panel</span>
+                </div>
+                <span className="text-white/60">→</span>
+              </Link>
+            )}
           </div>
 
           <button

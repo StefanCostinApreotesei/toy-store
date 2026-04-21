@@ -11,8 +11,8 @@ interface BreadcrumbsProps {
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav className="text-sm text-darkgray-light py-3">
-      <ol className="flex items-center gap-1.5 flex-wrap">
+    <nav className="text-xs sm:text-sm text-darkgray-light py-3 overflow-x-auto">
+      <ol className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
         <li>
           <Link href="/" className="hover:text-coral transition-colors">
             Acasă

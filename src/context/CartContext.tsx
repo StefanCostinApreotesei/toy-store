@@ -6,8 +6,10 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
+import { useSession } from "next-auth/react";
 
 export interface CartItem {
   productId: string;
@@ -31,37 +33,49 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = "jucariistore-cart";
+function storageKey(userId?: string | null): string {
+  return userId ? `jucariistore-cart-${userId}` : "jucariistore-cart-guest";
+}
 
-function loadCart(): CartItem[] {
+function loadCart(key: string): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
+    const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
   }
 }
 
-function saveCart(items: CartItem[]) {
+function saveCart(key: string, items: CartItem[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  localStorage.setItem(key, JSON.stringify(items));
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
+  const keyRef = useRef("");
 
+  // Load / reload when session resolves or user changes
   useEffect(() => {
-    setItems(loadCart());
-    setMounted(true);
-  }, []);
+    if (status === "loading") return;
 
-  useEffect(() => {
-    if (mounted) {
-      saveCart(items);
+    const key = storageKey(session?.user?.id);
+    if (key !== keyRef.current) {
+      keyRef.current = key;
+      setItems(loadCart(key));
     }
-  }, [items, mounted]);
+    if (!ready) setReady(true);
+  }, [session?.user?.id, status, ready]);
+
+  // Persist on change
+  useEffect(() => {
+    if (ready && keyRef.current) {
+      saveCart(keyRef.current, items);
+    }
+  }, [items, ready]);
 
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
